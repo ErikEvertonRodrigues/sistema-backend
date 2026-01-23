@@ -1,0 +1,5 @@
+db.sqlite3
+
+#Django
+__pycache__/
+*.py[cod]
