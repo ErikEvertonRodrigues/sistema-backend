@@ -16,3 +16,12 @@ Content-Type: application/json
     "username": "test",
     "password": "test"
 }
+
+### logout
+POST http://127.0.0.1:8000/accounts/logout/
+Content-Type: application/json
+Authorization: Token 4325dcafc6688f5f64a666f1c97f0059ac3d98d7
+
+{
+    "token": "4325dcafc6688f5f64a666f1c97f0059ac3d98d7"
+}

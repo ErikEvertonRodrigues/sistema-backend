@@ -30,3 +30,9 @@ def login(request):
     if user.check_password(request.data['password']):
         token = Token.objects.create(user=user)
         return Response({"message": "Login success", "token": token.key}, status=HTTP_200_OK)
+
+
+@api_view(['POST'])
+def logout(request):
+    Token.objects.get(key=request.data["token"]).delete()
+    return Response(status=HTTP_200_OK)
