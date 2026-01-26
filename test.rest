@@ -1,9 +1,18 @@
-###
+### register
 POST http://127.0.0.1:8000/accounts/register/
 Content-Type: application/json
 
 {
     "username": "test",
     "email": "test@abc.com",
+    "password": "test"
+}
+
+### login
+POST http://127.0.0.1:8000/accounts/login/
+Content-Type: application/json
+
+{
+    "username": "test",
     "password": "test"
 }
