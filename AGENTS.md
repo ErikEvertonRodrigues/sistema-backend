@@ -9,6 +9,9 @@ O frontend futuro será React Native; o foco atual é exclusivamente a API.
 - Python 3.13.5 no ambiente local inspecionado; Django exige Python >= 3.12.
 - Django 6.0.1 e Django REST Framework 3.16.1, conforme `requirements.txt`.
 - Banco atual: SQLite (`db.sqlite3`).
+  No Render gratuito, SQLite hospedado é temporário e descartável, apenas para testes.
+  Produção usa Gunicorn, nunca `runserver`; migrations do SQLite rodam antes do
+  Gunicorn no start, não em hooks de workers. Rever essa estratégia ao adotar banco persistente.
 - Autenticação da API: SimpleJWT 5.5.1, login por username, access de 5 minutos,
   refresh de 1 dia e `Authorization: Bearer <access>`. Login em `/accounts/login/`
   e refresh em `/accounts/token/refresh/`; sem rotação automática.
@@ -35,6 +38,11 @@ O frontend futuro será React Native; o foco atual é exclusivamente a API.
 
 ## API e segurança
 
+- Este repositório é público: todo conteúdo versionado deve ser considerado público.
+  Nunca versionar segredos, credenciais, tokens, chaves privadas, valores reais
+  sensíveis de ambiente, dados pessoais sensíveis ou bancos/dumps com dados reais.
+  `.env.local` nunca é versionado; exemplos, testes e documentação só usam dados fictícios.
+  Segredos vêm do ambiente; a chave antiga no histórico está comprometida e não pode ser reutilizada.
 - Usar DRF, códigos HTTP apropriados e serializers para validar payloads quando
   apropriado. Erros esperados de entrada nunca devem resultar em HTTP 500.
 - Serializers de entrada de accounts rejeitam campos extras e campos somente
@@ -50,6 +58,8 @@ O frontend futuro será React Native; o foco atual é exclusivamente a API.
 - Configurações de ambiente usam `os.environ`, sem carregamento automático de arquivo.
   `DJANGO_SECRET_KEY` é obrigatória; usar `.env.local` ignorado pelo Git no desenvolvimento,
   conforme README.md. Preservar o virtualenv `../.env`; nunca usá-lo como arquivo dotenv.
+- Habilitar `DJANGO_TRUST_PROXY_HEADERS` somente atrás de proxy confiável como o Render;
+  manter HTTPS/cookies seguros no deploy e validar HTTPS antes de habilitar HSTS.
 
 ## Testes
 

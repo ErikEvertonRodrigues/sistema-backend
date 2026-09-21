@@ -120,3 +120,19 @@ class SettingsEnvironmentTests(TestCase):
         database = config["DATABASES"]["default"]
         self.assertEqual(database["ENGINE"], "django.db.backends.sqlite3")
         self.assertEqual(database["NAME"], config["BASE_DIR"] / "db.sqlite3")
+
+    def test_forwarded_headers_are_not_trusted_by_default(self):
+        self.assertIsNone(self.load_settings()["SECURE_PROXY_SSL_HEADER"])
+
+    def test_proxy_trust_requires_explicit_opt_in(self):
+        config = self.load_settings(DJANGO_TRUST_PROXY_HEADERS="true")
+        self.assertEqual(config["SECURE_PROXY_SSL_HEADER"], ("HTTP_X_FORWARDED_PROTO", "https"))
+
+    def test_csrf_origins_are_optional_and_parsed_as_a_list(self):
+        self.assertEqual(self.load_settings()["CSRF_TRUSTED_ORIGINS"], [])
+        config = self.load_settings(
+            DJANGO_CSRF_TRUSTED_ORIGINS="https://example.onrender.com, https://admin.example.test, "
+        )
+        self.assertEqual(config["CSRF_TRUSTED_ORIGINS"], [
+            "https://example.onrender.com", "https://admin.example.test",
+        ])

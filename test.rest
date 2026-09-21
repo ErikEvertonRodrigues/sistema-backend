@@ -1,5 +1,8 @@
 @baseUrl = http://127.0.0.1:8000
 
+### saúde da aplicação (público, sem credenciais)
+GET {{baseUrl}}/health/
+
 ### register (dados sintéticos para desenvolvimento)
 POST {{baseUrl}}/accounts/register/
 Content-Type: application/json
