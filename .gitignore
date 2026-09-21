@@ -3,3 +3,9 @@ db.sqlite3
 #Django
 __pycache__/
 *.py[cod]
+
+# Local environment files and virtual environments (keep .env.example versionable).
+.env
+.env.*
+!.env.example
+.venv/

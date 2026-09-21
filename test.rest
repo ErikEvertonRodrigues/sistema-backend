@@ -1,27 +1,66 @@
-### register
-POST http://127.0.0.1:8000/accounts/register/
+@baseUrl = http://127.0.0.1:8000
+
+### register (dados sintéticos para desenvolvimento)
+POST {{baseUrl}}/accounts/register/
 Content-Type: application/json
 
 {
     "username": "test",
-    "email": "test@abc.com",
-    "password": "test"
+    "email": "test@example.com",
+    "password": "ExemploCadastroSeguro123!"
 }
 
 ### login
-POST http://127.0.0.1:8000/accounts/login/
+# @name login
+POST {{baseUrl}}/accounts/login/
 Content-Type: application/json
 
 {
     "username": "test",
-    "password": "test"
+    "password": "ExemploCadastroSeguro123!"
 }
 
-### logout
-POST http://127.0.0.1:8000/accounts/logout/
+### usuário autenticado
+GET {{baseUrl}}/accounts/me/
+Authorization: Bearer {{login.response.body.access}}
+
+### alterar senha (dados sintéticos; usar a nova senha nos próximos logins)
+# Sucesso: 204 sem corpo. Senha antiga deixa de funcionar no login.
+# Access e refresh anteriores passam a retornar 401; faça novo login abaixo.
+# Contrato e pendências: docs/change-password.md
+POST {{baseUrl}}/accounts/change-password/
+Authorization: Bearer {{login.response.body.access}}
 Content-Type: application/json
-Authorization: Token 4325dcafc6688f5f64a666f1c97f0059ac3d98d7
 
 {
-    "token": "4325dcafc6688f5f64a666f1c97f0059ac3d98d7"
+    "current_password": "ExemploCadastroSeguro123!",
+    "new_password": "NovaSenhaValida456!",
+    "new_password_confirm": "NovaSenhaValida456!"
+}
+
+### login após alteração de senha
+# @name loginAfterPasswordChange
+POST {{baseUrl}}/accounts/login/
+Content-Type: application/json
+
+{
+    "username": "test",
+    "password": "NovaSenhaValida456!"
+}
+
+### refresh após novo login
+POST {{baseUrl}}/accounts/token/refresh/
+Content-Type: application/json
+
+{
+    "refresh": "{{loginAfterPasswordChange.response.body.refresh}}"
+}
+
+### logout (revoga somente este refresh; access continua válido até expirar)
+POST {{baseUrl}}/accounts/logout/
+Authorization: Bearer {{loginAfterPasswordChange.response.body.access}}
+Content-Type: application/json
+
+{
+    "refresh": "{{loginAfterPasswordChange.response.body.refresh}}"
 }

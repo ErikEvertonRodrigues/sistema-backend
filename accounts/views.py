@@ -1,38 +1,45 @@
-from django.shortcuts import render
-from django.contrib.auth.models import User
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
-from rest_framework.status import HTTP_201_CREATED, HTTP_200_OK
-from rest_framework.authtoken.models import Token
-from .serializer import UserSerializer
+from rest_framework.status import HTTP_201_CREATED, HTTP_204_NO_CONTENT
 
-# Create your views here.
+from .serializer import (
+    ChangePasswordSerializer,
+    CurrentUserSerializer,
+    LogoutSerializer,
+    RegisterSerializer,
+)
 
-@api_view(['POST']) 
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
 def register(request):
-    user = UserSerializer(data=request.data)
-    
-    if user.is_valid():
-        user.save()
-
-        userRetrieved = User.objects.get(username=request.data["username"])
-        userRetrieved.set_password(user.data["password"])
-
-        userRetrieved.save()
-
-        return Response(user.data, status=HTTP_201_CREATED)
-    
-
-@api_view(['POST'])
-def login(request):
-    user = User.objects.get(username=request.data['username'])
-
-    if user.check_password(request.data['password']):
-        token = Token.objects.create(user=user)
-        return Response({"message": "Login success", "token": token.key}, status=HTTP_200_OK)
+    serializer = RegisterSerializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
+    serializer.save()
+    return Response(serializer.data, status=HTTP_201_CREATED)
 
 
 @api_view(['POST'])
+@permission_classes([IsAuthenticated])
 def logout(request):
-    Token.objects.get(key=request.data["token"]).delete()
-    return Response(status=HTTP_200_OK)
+    serializer = LogoutSerializer(data=request.data, context={"request": request})
+    serializer.is_valid(raise_exception=True)
+    serializer.save()
+    return Response(status=HTTP_204_NO_CONTENT)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def current_user(request):
+    serializer = CurrentUserSerializer(request.user)
+    return Response(serializer.data)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def change_password(request):
+    serializer = ChangePasswordSerializer(instance=request.user, data=request.data)
+    serializer.is_valid(raise_exception=True)
+    serializer.save()
+    return Response(status=HTTP_204_NO_CONTENT)
